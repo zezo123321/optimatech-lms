@@ -1,7 +1,7 @@
 import { useAppContext } from '../context/AppContext';
 import { translations } from '../lib/i18n';
 import { Button } from '@/components/ui/button';
-import { Globe, ArrowRight, ArrowLeft, ShieldCheck, Zap, BarChart, CheckCircle2 } from 'lucide-react';
+import { Globe, ArrowRight, ArrowLeft, ShieldCheck, Zap, BarChart, CheckCircle2, Building2, GraduationCap, LineChart } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function Landing() {
@@ -23,12 +23,12 @@ export function Landing() {
       </nav>
 
       {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-5xl mx-auto mt-12 md:mt-20">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-6xl mx-auto mt-12 md:mt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col items-center"
+          className="flex flex-col items-center w-full"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mb-8 border border-blue-100">
             <span className="relative flex h-2 w-2">
@@ -38,15 +38,17 @@ export function Landing() {
             {language === 'ar' ? 'النسخة التجريبية متاحة الآن' : 'Demo version available now'}
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1] max-w-4xl">
-            {t.tagline}
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1] max-w-5xl">
+            {language === 'ar' ? 'نظام التشغيل المتكامل لمراكز التدريب والمبادرات التنموية' : 'The Operating System for Training Centers & NGOs'}
           </h1>
-          <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            {t.about}
+          <p className="text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            {language === 'ar' 
+              ? 'تخلص من فوضى جداول الإكسيل وجروبات الواتساب. منصة واحدة لإدارة المتدربين، تتبع الحضور، تحصيل المدفوعات، واستخراج تقارير الأثر المجتمعي بضغطة زر.' 
+              : 'Replace Excel chaos and WhatsApp groups. One unified platform to manage learners, track attendance, collect payments, and generate impact reports instantly.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
             <Button size="lg" className="text-lg px-8 h-14 gap-2 w-full sm:w-auto shadow-lg shadow-blue-500/20" onClick={login}>
-              {t.tryDemo}
+              {language === 'ar' ? 'ابدأ الجولة التعريفية' : 'Start Guided Demo'}
               {language === 'ar' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 h-14 w-full sm:w-auto bg-white" onClick={login}>
@@ -54,9 +56,10 @@ export function Landing() {
             </Button>
           </div>
           
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-slate-500">
-            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> {language === 'ar' ? 'لا يتطلب بطاقة ائتمان' : 'No credit card required'}</div>
-            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> {language === 'ar' ? 'إعداد في 5 دقائق' : '5-minute setup'}</div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> {language === 'ar' ? 'مصمم خصيصاً للسوق العربي' : 'Built for the MENA market'}</div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> {language === 'ar' ? 'جاهز للعمل في 5 دقائق' : 'Ready in 5 minutes'}</div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> {language === 'ar' ? 'مساعد ذكي مدمج' : 'Built-in AI Copilot'}</div>
           </div>
         </motion.div>
 
@@ -65,7 +68,7 @@ export function Landing() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="w-full mt-20 relative"
+          className="w-full mt-20 relative max-w-5xl mx-auto"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent z-10 h-full w-full" />
           <div className="rounded-t-2xl border border-slate-200/60 bg-white shadow-2xl overflow-hidden">
@@ -93,39 +96,28 @@ export function Landing() {
           </div>
         </motion.div>
 
-        {/* Trusted By */}
-        <div className="w-full py-16 border-t border-slate-200 mt-10">
-          <p className="text-sm font-medium text-slate-500 mb-8 uppercase tracking-wider">{t.trustedBy}</p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale">
-            <div className="text-xl font-bold font-serif">Misr El Kheir</div>
-            <div className="text-xl font-bold">NilePreneurs</div>
-            <div className="text-xl font-bold italic">Digital Egypt</div>
-            <div className="text-xl font-bold font-mono">TIEC</div>
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-24 w-full text-start">
+        {/* Value Proposition Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-24 w-full text-start border-t border-slate-200 mt-10">
           <div className="p-8 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6">
-              <ShieldCheck className="w-6 h-6" />
+              <Building2 className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold mb-3">{language === 'ar' ? 'إدارة آمنة ومركزية' : 'Secure Central Management'}</h3>
-            <p className="text-slate-600 leading-relaxed">{language === 'ar' ? 'بيانات المتدربين، المدربين، والبرامج آمنة ومنظمة في مكان واحد بعيداً عن فوضى الأوراق وجداول الإكسيل.' : 'Learner, instructor, and program data is safe and organized in one place, away from paper and Excel chaos.'}</p>
+            <h3 className="text-xl font-bold mb-3">{language === 'ar' ? 'عمليات تشغيلية سلسة' : 'Seamless Operations'}</h3>
+            <p className="text-slate-600 leading-relaxed">{language === 'ar' ? 'إدارة الدفعات، جدولة الجلسات، وتسجيل الحضور والغياب في مكان واحد مخصص لاحتياجات مراكز التدريب.' : 'Manage cohorts, schedule sessions, and record attendance in one place tailored for training centers.'}</p>
           </div>
           <div className="p-8 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-6">
-              <Zap className="w-6 h-6" />
+              <GraduationCap className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold mb-3">{language === 'ar' ? 'أتمتة العمليات اليومية' : 'Automate Daily Operations'}</h3>
-            <p className="text-slate-600 leading-relaxed">{language === 'ar' ? 'سجل الحضور والغياب، تتبع المدفوعات، وأصدر الشهادات في ثوانٍ معدودة بضغطة زر.' : 'Record attendance, track payments, and issue certificates in seconds with a single click.'}</p>
+            <h3 className="text-xl font-bold mb-3">{language === 'ar' ? 'تجربة تعلم متكاملة' : 'Integrated Learning'}</h3>
+            <p className="text-slate-600 leading-relaxed">{language === 'ar' ? 'مساحة عمل مخصصة لكل برنامج تحتوي على الفيديوهات، المواد العلمية، ومساعد ذكي لدعم المتدربين والمدربين.' : 'Dedicated workspace for each program with videos, materials, and an AI copilot to support learners and trainers.'}</p>
           </div>
           <div className="p-8 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 mb-6">
-              <BarChart className="w-6 h-6" />
+              <LineChart className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold mb-3">{language === 'ar' ? 'تقارير الأثر المجتمعي' : 'Social Impact Reports'}</h3>
-            <p className="text-slate-600 leading-relaxed">{language === 'ar' ? 'استخرج تقارير احترافية تعكس أثر برامجك التنموية لتقديمها للجهات المانحة والشركاء.' : 'Extract professional reports reflecting the impact of your development programs for donors and partners.'}</p>
+            <h3 className="text-xl font-bold mb-3">{language === 'ar' ? 'تقارير الأثر المجتمعي' : 'Impact Reporting'}</h3>
+            <p className="text-slate-600 leading-relaxed">{language === 'ar' ? 'تتبع نسب الإنجاز، التحصيل المالي، واستخرج تقارير احترافية تعكس أثر برامجك لتقديمها للجهات المانحة.' : 'Track completion rates, financial collection, and extract professional reports for donors and stakeholders.'}</p>
           </div>
         </div>
       </main>

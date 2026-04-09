@@ -25,6 +25,8 @@ interface AppContextType {
   setDemoStep: (step: number) => void;
   activePage: string;
   setActivePage: (page: string) => void;
+  activeProgramId: string | null;
+  setActiveProgramId: (id: string | null) => void;
 }
 
 const organizations: Organization[] = [
@@ -42,6 +44,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [activePage, setActivePage] = useState('dashboard');
+  const [activeProgramId, setActiveProgramId] = useState<string | null>(null);
 
   useEffect(() => {
     document.dir = language === 'ar' ? 'rtl' : 'ltr';
@@ -53,6 +56,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsLoggedIn(false);
     setDemoStep(0);
     setActivePage('dashboard');
+    setActiveProgramId(null);
   };
 
   return (
@@ -72,6 +76,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDemoStep,
         activePage,
         setActivePage,
+        activeProgramId,
+        setActiveProgramId,
       }}
     >
       {children}

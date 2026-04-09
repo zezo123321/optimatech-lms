@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Users, Calendar, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 export function Programs() {
-  const { language, demoStep, setDemoStep } = useAppContext();
+  const { language, demoStep, setDemoStep, setActivePage, setActiveProgramId } = useAppContext();
   const t = translations[language];
   const [isNewCohortOpen, setIsNewCohortOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -35,6 +35,11 @@ export function Programs() {
         setDemoStep(2);
       }
     }, 2000);
+  };
+
+  const handleCohortClick = (id: string) => {
+    setActiveProgramId(id);
+    setActivePage('training-details');
   };
 
   return (
@@ -172,14 +177,18 @@ export function Programs() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {mockCohorts.map((cohort) => (
-          <Card key={cohort.id} className="border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+          <Card 
+            key={cohort.id} 
+            className="border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+            onClick={() => handleCohortClick(cohort.id)}
+          >
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-none">
                   {cohort.program}
                 </Badge>
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none">
-                  {language === 'ar' ? 'نشط' : 'Active'}
+                <Badge className={cohort.status === 'active' ? 'bg-green-100 text-green-700 hover:bg-green-100 border-none' : cohort.status === 'completed' ? 'bg-slate-100 text-slate-700 hover:bg-slate-100 border-none' : 'bg-orange-100 text-orange-700 hover:bg-orange-100 border-none'}>
+                  {language === 'ar' ? (cohort.status === 'active' ? 'نشط' : cohort.status === 'completed' ? 'مكتمل' : 'قادم') : (cohort.status === 'active' ? 'Active' : cohort.status === 'completed' ? 'Completed' : 'Upcoming')}
                 </Badge>
               </div>
               <CardTitle className="text-xl mt-4 group-hover:text-primary transition-colors">

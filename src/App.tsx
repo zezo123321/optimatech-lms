@@ -10,16 +10,21 @@ import { Learners } from './pages/Learners';
 import { Payments } from './pages/Payments';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
+import { TrainingDetails } from './pages/TrainingDetails';
 import { DemoGuide } from './components/DemoGuide';
 
 function AppContent() {
-  const { isLoggedIn, language, activePage, setActivePage } = useAppContext();
+  const { isLoggedIn, language, activePage, setActivePage, activeProgramId } = useAppContext();
 
   if (!isLoggedIn) {
     return <Landing />;
   }
 
   const renderPage = () => {
+    if (activePage === 'training-details' && activeProgramId) {
+      return <TrainingDetails />;
+    }
+
     switch (activePage) {
       case 'dashboard': return <Dashboard />;
       case 'programs': return <Programs />;
