@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { translations } from '../lib/i18n';
 import { mockCohorts, mockLearners, mockSessions, mockVideos, mockMaterials, mockInvoices } from '../data/mockData';
@@ -34,7 +34,7 @@ export function TrainingDetails() {
   const videos = mockVideos.filter(v => sessions.some(s => s.id === v.sessionId));
   const materials = mockMaterials.filter(m => sessions.some(s => s.id === m.sessionId));
 
-  const handleAiSubmit = (e: React.FormEvent) => {
+  const handleAiSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!aiInput.trim()) return;
     
