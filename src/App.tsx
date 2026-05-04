@@ -201,6 +201,7 @@ function Hero({
   primary,
   secondary,
   navigate,
+  showVisual = false,
 }: {
   lang: Lang;
   title: string;
@@ -209,6 +210,7 @@ function Hero({
   primary: string;
   secondary?: string;
   navigate: (href: string) => void;
+  showVisual?: boolean;
 }) {
   const visual =
     lang === "ar"
@@ -250,7 +252,7 @@ function Hero({
           backgroundSize: "32px 32px",
         }}
       />
-      <div className={`${sectionClass} relative grid min-h-[640px] items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-24`}>
+      <div className={`${sectionClass} relative grid min-h-[480px] items-center gap-12 py-20 lg:py-24 ${showVisual ? "lg:grid-cols-[1.1fr_0.9fr]" : "max-w-4xl"}`}>
         <motion.div
           variants={stagger}
           initial="hidden"
@@ -298,43 +300,45 @@ function Hero({
           </motion.div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: lang === "ar" ? -40 : 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.65, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative"
-        >
-          <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-teal-100/40 to-slate-100/40 blur-2xl" />
-          <div className="relative rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xl shadow-slate-200/60 ring-1 ring-slate-100">
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
-              <p className="text-sm font-semibold text-teal-700">{visual.title}</p>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">{visual.subtitle}</p>
+        {showVisual && (
+          <motion.div
+            initial={{ opacity: 0, x: lang === "ar" ? -40 : 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.65, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="relative"
+          >
+            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-teal-100/40 to-slate-100/40 blur-2xl" />
+            <div className="relative rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xl shadow-slate-200/60 ring-1 ring-slate-100">
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+                <p className="text-sm font-semibold text-teal-700">{visual.title}</p>
+                <p className="mt-1.5 text-sm leading-6 text-slate-500">{visual.subtitle}</p>
+              </div>
+              <motion.div
+                variants={cardStagger}
+                initial="hidden"
+                animate="show"
+                className="mt-3 grid gap-2.5"
+              >
+                {visual.items.map(([item, detail]) => (
+                  <motion.div
+                    key={item}
+                    variants={fadeUp}
+                    className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3.5 shadow-sm"
+                  >
+                    <CheckCircle2 className="mt-0.5 size-4.5 shrink-0 text-teal-500" />
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{item}</p>
+                      <p className="mt-0.5 text-xs leading-5 text-slate-500">{detail}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+              <div className="mt-3 rounded-xl border border-teal-100 bg-gradient-to-r from-teal-50 to-cyan-50 p-3.5 text-sm font-medium leading-6 text-teal-800">
+                {visual.note}
+              </div>
             </div>
-            <motion.div
-              variants={cardStagger}
-              initial="hidden"
-              animate="show"
-              className="mt-3 grid gap-2.5"
-            >
-              {visual.items.map(([item, detail]) => (
-                <motion.div
-                  key={item}
-                  variants={fadeUp}
-                  className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3.5 shadow-sm"
-                >
-                  <CheckCircle2 className="mt-0.5 size-4.5 shrink-0 text-teal-500" />
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">{item}</p>
-                    <p className="mt-0.5 text-xs leading-5 text-slate-500">{detail}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-            <div className="mt-3 rounded-xl border border-teal-100 bg-gradient-to-r from-teal-50 to-cyan-50 p-3.5 text-sm font-medium leading-6 text-teal-800">
-              {visual.note}
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </section>
   );
@@ -733,7 +737,7 @@ function Home({ lang, navigate }: { lang: Lang; navigate: (href: string) => void
   const t = content[lang];
   return (
     <>
-      <Hero lang={lang} title={t.home.heroTitle} body={t.home.heroBody} eyebrow={t.home.promise} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} />
+      <Hero lang={lang} title={t.home.heroTitle} body={t.home.heroBody} eyebrow={t.home.promise} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} showVisual />
       <CardGrid lang={lang} title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
       <CardGrid lang={lang} title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
       <Why lang={lang} title={t.home.whyTitle} bullets={t.home.whyBullets} />
