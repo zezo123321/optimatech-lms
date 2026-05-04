@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type Key, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type Key, type ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -22,6 +23,21 @@ import {
 } from "@/content/site";
 
 const sectionClass = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] } },
+};
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.5 } },
+};
 
 function usePath() {
   const [path, setPath] = useState(() => normalizePath(window.location.pathname));
@@ -83,7 +99,14 @@ function Header({
   navigate: (href: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const t = content[lang];
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const links = navItems.map((item) => (
     <AppLink
@@ -91,8 +114,10 @@ function Header({
       href={item.href}
       navigate={navigate}
       onClick={() => setOpen(false)}
-      className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-        normalizePath(item.href) === path ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+      className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+        normalizePath(item.href) === path
+          ? "bg-slate-900 text-white shadow-sm"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
       {t.nav[item.key as keyof typeof t.nav]}
@@ -100,50 +125,70 @@ function Header({
   ));
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
+    <header
+      className={`sticky top-0 z-40 border-b border-slate-200/60 bg-white/95 backdrop-blur transition-shadow duration-300 ${
+        scrolled ? "shadow-sm shadow-slate-200/80" : ""
+      }`}
+    >
       <div className={`${sectionClass} flex h-16 items-center justify-between gap-4`}>
-        <AppLink href="/" navigate={navigate} className="flex items-center gap-3">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-slate-950 text-white">
+        <AppLink href="/" navigate={navigate} className="flex items-center gap-2.5">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 text-white shadow-sm">
             <Sparkles className="size-4" />
           </span>
-          <span className="text-lg font-bold tracking-normal text-slate-950">{t.brand}</span>
+          <span className="text-lg font-bold tracking-tight text-slate-950">{t.brand}</span>
         </AppLink>
 
-        <nav className="hidden items-center gap-1 lg:flex">{links}</nav>
+        <nav className="hidden items-center gap-0.5 lg:flex">{links}</nav>
 
         <div className="hidden items-center gap-2 lg:flex">
           <button
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
             onClick={() => setLang(lang === "ar" ? "en" : "ar")}
             aria-label={lang === "ar" ? "Switch to English" : "التبديل إلى العربية"}
           >
-            <Globe2 className="size-4" />
+            <Globe2 className="size-3.5" />
             {lang === "ar" ? "EN" : "عربي"}
           </button>
-          <AppLink href="/contact/" navigate={navigate} className="inline-flex h-10 items-center rounded-lg bg-teal-600 px-4 text-sm font-semibold text-white transition hover:bg-teal-700">
+          <AppLink
+            href="/contact/"
+            navigate={navigate}
+            className="inline-flex h-9 items-center rounded-lg bg-teal-600 px-4 text-sm font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700"
+          >
             {t.cta.primary}
           </AppLink>
         </div>
 
-        <button className="inline-flex size-10 items-center justify-center rounded-lg border border-slate-200 lg:hidden" onClick={() => setOpen(!open)} aria-label="Toggle menu">
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+        <button
+          className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-200 lg:hidden"
+          onClick={() => setOpen(!open)}
+          aria-label="Toggle menu"
+        >
+          {open ? <X className="size-4" /> : <Menu className="size-4" />}
         </button>
       </div>
 
-      {open && (
-        <div className="border-t border-slate-200 bg-white lg:hidden">
-          <div className="mx-auto grid max-w-7xl gap-1 px-4 py-4">
-            {links}
-            <button
-              className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold"
-              onClick={() => setLang(lang === "ar" ? "en" : "ar")}
-            >
-              <Globe2 className="size-4" />
-              {lang === "ar" ? "English" : "العربية"}
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22 }}
+            className="overflow-hidden border-t border-slate-200 bg-white lg:hidden"
+          >
+            <div className="mx-auto grid max-w-7xl gap-1 px-4 py-4">
+              {links}
+              <button
+                className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-medium"
+                onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+              >
+                <Globe2 className="size-4" />
+                {lang === "ar" ? "English" : "العربية"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
@@ -156,6 +201,7 @@ function Hero({
   primary,
   secondary,
   navigate,
+  showVisual = false,
 }: {
   lang: Lang;
   title: string;
@@ -164,6 +210,7 @@ function Hero({
   primary: string;
   secondary?: string;
   navigate: (href: string) => void;
+  showVisual?: boolean;
 }) {
   const visual =
     lang === "ar"
@@ -190,53 +237,108 @@ function Hero({
           note: "The goal: connected tools that support daily operations, not just a polished surface.",
         };
 
+  const cardStagger = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08, delayChildren: 0.6 } },
+  };
+
   return (
-    <section className="relative overflow-hidden border-b border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)]">
-      <div className={`${sectionClass} grid min-h-[620px] items-center gap-10 py-16 lg:grid-cols-[1.02fr_0.98fr] lg:py-20`}>
-        <div>
-          {eyebrow && <p className="mb-4 inline-flex rounded-lg bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">{eyebrow}</p>}
-          <h1 className="max-w-4xl text-4xl font-bold leading-tight tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">{title}</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">{body}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <AppLink href="/contact/" navigate={navigate} className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 text-sm font-bold text-white transition hover:bg-teal-700">
+    <section className="relative overflow-hidden border-b border-slate-200/60 bg-gradient-to-br from-slate-50 via-white to-cyan-50/40">
+      {/* subtle dot grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.025]"
+        style={{
+          backgroundImage: "radial-gradient(circle, #0f172a 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+      <div className={`${sectionClass} relative grid min-h-[480px] items-center gap-12 py-20 lg:py-24 ${showVisual ? "lg:grid-cols-[1.1fr_0.9fr]" : "max-w-4xl"}`}>
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
+          {eyebrow && (
+            <motion.p
+              variants={fadeUp}
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5 text-sm font-semibold text-teal-700"
+            >
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-teal-400 opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-teal-500" />
+              </span>
+              {eyebrow}
+            </motion.p>
+          )}
+          <motion.h1
+            variants={fadeUp}
+            className="max-w-2xl text-4xl font-bold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem]"
+          >
+            {title}
+          </motion.h1>
+          <motion.p variants={fadeUp} className="mt-6 max-w-xl text-lg leading-8 text-slate-500">
+            {body}
+          </motion.p>
+          <motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <AppLink
+              href="/contact/"
+              navigate={navigate}
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 text-sm font-bold text-white shadow-md shadow-teal-600/25 transition hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/30"
+            >
               {primary}
-              <ArrowRight className="size-4 rtl:rotate-180" />
+              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
             </AppLink>
             {secondary && (
-              <AppLink href="/solutions/" navigate={navigate} className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 text-sm font-bold text-slate-900 transition hover:bg-slate-50">
+              <AppLink
+                href="/solutions/"
+                navigate={navigate}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-800 shadow-sm transition hover:border-slate-300 hover:shadow"
+              >
                 {secondary}
               </AppLink>
             )}
-          </div>
-        </div>
-        <div className="relative">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60">
-            <div className="grid gap-3">
-              <div className="rounded-lg border border-slate-200 bg-white p-4 text-slate-950">
-                <div>
-                  <p className="text-sm font-semibold text-teal-700">{visual.title}</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">{visual.subtitle}</p>
-                </div>
+          </motion.div>
+        </motion.div>
+
+        {showVisual && (
+          <motion.div
+            initial={{ opacity: 0, x: lang === "ar" ? -40 : 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.65, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="relative"
+          >
+            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-teal-100/40 to-slate-100/40 blur-2xl" />
+            <div className="relative rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xl shadow-slate-200/60 ring-1 ring-slate-100">
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+                <p className="text-sm font-semibold text-teal-700">{visual.title}</p>
+                <p className="mt-1.5 text-sm leading-6 text-slate-500">{visual.subtitle}</p>
               </div>
-              <div className="grid gap-3">
+              <motion.div
+                variants={cardStagger}
+                initial="hidden"
+                animate="show"
+                className="mt-3 grid gap-2.5"
+              >
                 {visual.items.map(([item, detail]) => (
-                  <div key={item} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="size-5 shrink-0 text-teal-600" />
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{item}</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">{detail}</p>
-                      </div>
+                  <motion.div
+                    key={item}
+                    variants={fadeUp}
+                    className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3.5 shadow-sm"
+                  >
+                    <CheckCircle2 className="mt-0.5 size-4.5 shrink-0 text-teal-500" />
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{item}</p>
+                      <p className="mt-0.5 text-xs leading-5 text-slate-500">{detail}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-              <div className="rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm font-medium text-teal-900">
+              </motion.div>
+              <div className="mt-3 rounded-xl border border-teal-100 bg-gradient-to-r from-teal-50 to-cyan-50 p-3.5 text-sm font-medium leading-6 text-teal-800">
                 {visual.note}
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </div>
     </section>
   );
@@ -244,10 +346,16 @@ function Hero({
 
 function SectionHeading({ title, body }: { title: string; body?: string }) {
   return (
-    <div className="mb-8 max-w-3xl">
-      <h2 className="text-3xl font-bold tracking-normal text-slate-950">{title}</h2>
-      {body && <p className="mt-3 text-base leading-7 text-slate-600">{body}</p>}
-    </div>
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-60px" }}
+      className="mb-10 max-w-2xl"
+    >
+      <h2 className="text-3xl font-bold tracking-tight text-slate-950">{title}</h2>
+      {body && <p className="mt-3 text-base leading-7 text-slate-500">{body}</p>}
+    </motion.div>
   );
 }
 
@@ -265,27 +373,57 @@ function CardGrid({
   navigate: (href: string) => void;
 }) {
   const t = content[lang];
+  const iconGradients: Record<string, string> = {
+    workspace: "from-blue-50 to-indigo-50 text-indigo-600",
+    websites: "from-violet-50 to-purple-50 text-violet-600",
+    automation: "from-orange-50 to-amber-50 text-amber-600",
+    cloud: "from-sky-50 to-cyan-50 text-sky-600",
+    sectors: "from-teal-50 to-emerald-50 text-teal-600",
+    support: "from-rose-50 to-pink-50 text-rose-600",
+    education: "from-blue-50 to-indigo-50 text-indigo-600",
+    ngos: "from-green-50 to-emerald-50 text-emerald-600",
+    ai: "from-violet-50 to-purple-50 text-violet-600",
+    hr: "from-orange-50 to-amber-50 text-amber-600",
+    smb: "from-teal-50 to-cyan-50 text-teal-600",
+  };
+
   return (
-    <section className={`${sectionClass} py-16`}>
+    <section className={`${sectionClass} py-20`}>
       <SectionHeading title={title} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-40px" }}
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+      >
         {items.map((item) => {
-          const Icon = type === "service" ? serviceIcons[item.id as keyof typeof serviceIcons] : sectorIcons[item.id as keyof typeof sectorIcons];
+          const Icon =
+            type === "service"
+              ? serviceIcons[item.id as keyof typeof serviceIcons]
+              : sectorIcons[item.id as keyof typeof sectorIcons];
+          const gradient = iconGradients[item.id] || "from-teal-50 to-cyan-50 text-teal-600";
           return (
-            <AppLink key={item.title} href={item.href} navigate={navigate} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-teal-200 hover:shadow-lg">
-              <span className="mb-5 flex size-11 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
-                <Icon className="size-5" />
-              </span>
-              <h3 className="text-lg font-bold text-slate-950">{item.title}</h3>
-              <p className="mt-3 min-h-20 text-sm leading-7 text-slate-600">{item.body}</p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-teal-700">
-                {t.ui.learnMore}
-                <ArrowRight className="size-4 transition group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
-              </span>
-            </AppLink>
+            <motion.div key={item.title} variants={fadeUp}>
+              <AppLink
+                href={item.href}
+                navigate={navigate}
+                className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/60"
+              >
+                <span className={`mb-5 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient}`}>
+                  <Icon className="size-5" />
+                </span>
+                <h3 className="text-lg font-bold text-slate-950">{item.title}</h3>
+                <p className="mt-2.5 flex-1 text-sm leading-7 text-slate-500">{item.body}</p>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-teal-700">
+                  {t.ui.learnMore}
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+                </span>
+              </AppLink>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -293,16 +431,26 @@ function CardGrid({
 function FeatureGrid({ lang, title, features }: { lang: Lang; title: string; features: string[] }) {
   const t = content[lang];
   return (
-    <section className={`${sectionClass} py-16`}>
+    <section className={`${sectionClass} py-20`}>
       <SectionHeading title={title || t.ui.whatWeBuild} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-40px" }}
+        className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"
+      >
         {features.map((feature) => (
-          <div key={feature} className="flex gap-3 rounded-xl border border-slate-200 bg-white p-5">
-            <CheckCircle2 className="mt-1 size-5 shrink-0 text-teal-600" />
+          <motion.div
+            key={feature}
+            variants={fadeUp}
+            className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-teal-500" />
             <p className="font-semibold leading-7 text-slate-800">{feature}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -342,34 +490,44 @@ function WebsitePackagesDetail({
 
   return (
     <>
-      <section className="bg-slate-50 py-16">
+      <section className="bg-slate-50/60 py-20">
         <div className={sectionClass}>
           <SectionHeading title={labels.title} body={labels.body} />
-          <div className="grid gap-4 lg:grid-cols-4">
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-40px" }}
+            className="grid gap-4 lg:grid-cols-4"
+          >
             {page.packages.map((pack) => (
-              <div key={pack.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <motion.div
+                key={pack.name}
+                variants={fadeUp}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
                 <h3 className="text-lg font-bold text-slate-950">{pack.name}</h3>
                 <p className="mt-4 text-xs font-bold uppercase tracking-wide text-teal-700">{labels.bestFor}</p>
-                <p className="mt-2 min-h-20 text-sm leading-7 text-slate-600">{pack.bestFor}</p>
-                <p className="mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">{labels.includes}</p>
+                <p className="mt-2 min-h-20 text-sm leading-7 text-slate-500">{pack.bestFor}</p>
+                <p className="mt-5 text-xs font-bold uppercase tracking-wide text-slate-400">{labels.includes}</p>
                 <ul className="mt-3 grid gap-2">
                   {pack.includes.map((item) => (
                     <li key={item} className="flex gap-2 text-sm leading-6 text-slate-700">
-                      <CheckCircle2 className="mt-1 size-4 shrink-0 text-teal-600" />
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-teal-500" />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
                 <p className="mt-6 rounded-lg bg-slate-950 px-3 py-2 text-center text-sm font-bold text-white">{labels.request}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      <section className={`${sectionClass} py-16`}>
+      <section className={`${sectionClass} py-20`}>
         <SectionHeading title={labels.comparison} />
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
               <tr className="bg-slate-950 text-white">
@@ -382,9 +540,12 @@ function WebsitePackagesDetail({
             </thead>
             <tbody>
               {page.comparison.map((row) => (
-                <tr key={row[0]} className="border-t border-slate-200">
+                <tr key={row[0]} className="border-t border-slate-100 transition hover:bg-slate-50/60">
                   {row.map((cell, index) => (
-                    <td key={`${row[0]}-${cell}`} className={`px-4 py-4 ${index === 0 ? "font-bold text-slate-950" : "text-slate-600"}`}>
+                    <td
+                      key={`${row[0]}-${cell}`}
+                      className={`px-4 py-4 ${index === 0 ? "font-bold text-slate-950" : "text-slate-500"}`}
+                    >
                       {cell}
                     </td>
                   ))}
@@ -401,17 +562,32 @@ function WebsitePackagesDetail({
 function Process({ lang }: { lang: Lang }) {
   const t = content[lang];
   return (
-    <section className="bg-slate-950 py-16 text-white">
-      <div className={sectionClass}>
+    <section className="relative overflow-hidden bg-slate-950 py-20 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(20,184,166,0.12),transparent_60%)]" />
+      <div className={`relative ${sectionClass}`}>
         <SectionHeading title={t.ui.process} body={t.ui.processBody} />
-        <div className="grid gap-4 md:grid-cols-5">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+          className="relative grid gap-4 md:grid-cols-5"
+        >
+          {/* connecting line desktop */}
+          <div className="absolute start-0 end-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-white/10 to-transparent md:block" />
           {t.process.map((step, index) => (
-            <div key={step} className="rounded-xl border border-white/10 bg-white/5 p-5">
-              <span className="text-sm font-bold text-teal-300">0{index + 1}</span>
-              <h3 className="mt-4 font-bold">{step}</h3>
-            </div>
+            <motion.div
+              key={step}
+              variants={fadeUp}
+              className="relative rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm"
+            >
+              <span className="flex size-8 items-center justify-center rounded-full bg-teal-500/20 text-sm font-bold text-teal-300">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 className="mt-4 font-bold text-white">{step}</h3>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -420,17 +596,29 @@ function Process({ lang }: { lang: Lang }) {
 function Why({ lang, title, bullets }: { lang: Lang; title: string; bullets: string[] }) {
   const t = content[lang];
   return (
-    <section className="bg-slate-50 py-16">
-      <div className={`${sectionClass} grid gap-8 lg:grid-cols-[0.8fr_1.2fr]`}>
-        <SectionHeading title={title} body={t.home.whyBody} />
-        <div className="grid gap-3">
-          {bullets.map((bullet) => (
-            <div key={bullet} className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-              <CheckCircle2 className="mt-1 size-5 shrink-0 text-teal-600" />
-              <p className="font-medium leading-7 text-slate-700">{bullet}</p>
-            </div>
-          ))}
+    <section className="bg-gradient-to-br from-slate-50 to-white py-20">
+      <div className={`${sectionClass} grid gap-12 lg:grid-cols-[0.85fr_1.15fr]`}>
+        <div>
+          <SectionHeading title={title} body={t.home.whyBody} />
         </div>
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+          className="grid gap-3"
+        >
+          {bullets.map((bullet) => (
+            <motion.div
+              key={bullet}
+              variants={fadeUp}
+              className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:border-teal-200 hover:shadow-md"
+            >
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-teal-500" />
+              <p className="font-medium leading-7 text-slate-700">{bullet}</p>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
@@ -439,37 +627,68 @@ function Why({ lang, title, bullets }: { lang: Lang; title: string; bullets: str
 function UseCases({ lang }: { lang: Lang }) {
   const t = content[lang];
   return (
-    <section className={`${sectionClass} py-16`}>
+    <section className={`${sectionClass} py-20`}>
       <SectionHeading title={t.pages.useCases.title} body={t.pages.useCases.body} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-40px" }}
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+      >
         {t.useCases.map(([title, body]) => (
-          <div key={title} className="rounded-xl border border-slate-200 bg-white p-5">
+          <motion.div
+            key={title}
+            variants={fadeUp}
+            className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
             <h3 className="font-bold text-slate-950">{title}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
-          </div>
+            <p className="mt-2.5 text-sm leading-7 text-slate-500">{body}</p>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 function PricingStarts({ lang, navigate }: { lang: Lang; navigate: (href: string) => void }) {
   const t = content[lang];
+  const gradients = [
+    "from-blue-500 to-indigo-600",
+    "from-teal-500 to-emerald-600",
+    "from-violet-500 to-purple-600",
+  ];
   return (
-    <section className="bg-white py-16">
+    <section className="bg-slate-50/60 py-20">
       <div className={sectionClass}>
         <SectionHeading title={t.home.packagesTitle} />
-        <div className="grid gap-4 md:grid-cols-3">
-          {t.pricing.map(({ title, body, href }) => (
-            <div key={title} className="rounded-xl border border-slate-200 p-5">
-              <h3 className="text-lg font-bold">{title}</h3>
-              <p className="mt-3 min-h-16 text-sm leading-7 text-slate-600">{body}</p>
-              <AppLink href={href} navigate={navigate} className="mt-5 inline-flex h-10 items-center rounded-lg bg-slate-950 px-4 text-sm font-bold text-white">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+          className="grid gap-5 md:grid-cols-3"
+        >
+          {t.pricing.map(({ title, body, href }, i) => (
+            <motion.div
+              key={title}
+              variants={fadeUp}
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+            >
+              <div className={`absolute start-0 top-0 h-1 w-full rounded-t-2xl bg-gradient-to-r ${gradients[i]}`} />
+              <h3 className="text-lg font-bold text-slate-950">{title}</h3>
+              <p className="mt-3 min-h-14 text-sm leading-7 text-slate-500">{body}</p>
+              <AppLink
+                href={href}
+                navigate={navigate}
+                className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800"
+              >
                 {t.cta.quote}
+                <ArrowRight className="size-3.5 rtl:rotate-180" />
               </AppLink>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -478,22 +697,38 @@ function PricingStarts({ lang, navigate }: { lang: Lang; navigate: (href: string
 function CtaBand({ lang, message, navigate }: { lang: Lang; message?: string; navigate: (href: string) => void }) {
   const t = content[lang];
   return (
-    <section className={`${sectionClass} py-16`}>
-      <div className="grid gap-6 rounded-xl bg-slate-950 p-6 text-white md:grid-cols-[1fr_auto] md:items-center md:p-8">
-        <div>
-          <h2 className="text-2xl font-bold">{t.cta.primary}</h2>
-          <p className="mt-2 text-slate-300">{t.home.promise}</p>
+    <section className={`${sectionClass} py-20`}>
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-60px" }}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-teal-950 p-8 text-white md:p-12"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(20,184,166,0.2),transparent_60%)]" />
+        <div className="relative grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <h2 className="text-2xl font-bold md:text-3xl">{t.cta.primary}</h2>
+            <p className="mt-2 text-slate-300">{t.home.promise}</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <AppLink
+              href="/contact/"
+              navigate={navigate}
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-teal-500 px-5 text-sm font-bold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-400"
+            >
+              {t.cta.primary}
+            </AppLink>
+            <a
+              href={whatsappUrl(message || t.cta.primary)}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 text-sm font-bold backdrop-blur transition hover:bg-white/10"
+            >
+              <MessageCircle className="size-4" />
+              {t.cta.whatsapp}
+            </a>
+          </div>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <AppLink href="/contact/" navigate={navigate} className="inline-flex h-11 items-center justify-center rounded-lg bg-teal-500 px-4 text-sm font-bold text-white">
-            {t.cta.primary}
-          </AppLink>
-          <a href={whatsappUrl(message || t.cta.primary)} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 text-sm font-bold">
-            <MessageCircle className="size-4" />
-            {t.cta.whatsapp}
-          </a>
-        </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -502,7 +737,7 @@ function Home({ lang, navigate }: { lang: Lang; navigate: (href: string) => void
   const t = content[lang];
   return (
     <>
-      <Hero lang={lang} title={t.home.heroTitle} body={t.home.heroBody} eyebrow={t.home.promise} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} />
+      <Hero lang={lang} title={t.home.heroTitle} body={t.home.heroBody} eyebrow={t.home.promise} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} showVisual />
       <CardGrid lang={lang} title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
       <CardGrid lang={lang} title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
       <Why lang={lang} title={t.home.whyTitle} bullets={t.home.whyBullets} />
@@ -560,6 +795,40 @@ function DetailPage({ lang, path, navigate }: { lang: Lang; path: string; naviga
   );
 }
 
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className={`rounded-2xl border bg-white transition-all duration-200 ${open ? "border-teal-200 shadow-md shadow-teal-100/60" : "border-slate-200 shadow-sm"}`}>
+      <button
+        className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-start font-bold text-slate-950"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        <span>{q}</span>
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="size-5 shrink-0 text-slate-400" />
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            ref={ref}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <p className="px-5 pb-5 leading-7 text-slate-500">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function Faq({ lang }: { lang: Lang }) {
   const t = content[lang];
   const questions =
@@ -574,21 +843,24 @@ function Faq({ lang }: { lang: Lang }) {
           ["Are prices fixed?", "We use starting points or custom quotes because scope depends on the current setup and business needs."],
           ["Can we start with one service?", "Yes, you can start with Workspace, a website, or one automation workflow and expand later."],
         ];
+
   return (
-    <section className="bg-slate-50 py-16">
+    <section className="bg-slate-50/60 py-20">
       <div className={sectionClass}>
         <SectionHeading title={t.ui.faq} />
-        <div className="grid gap-3">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+          className="grid gap-3"
+        >
           {questions.map(([q, a]) => (
-            <details key={q} className="group rounded-xl border border-slate-200 bg-white p-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-slate-950">
-                {q}
-                <ChevronDown className="size-5 shrink-0 transition group-open:rotate-180" />
-              </summary>
-              <p className="mt-4 leading-7 text-slate-600">{a}</p>
-            </details>
+            <motion.div key={q} variants={fadeUp}>
+              <FaqItem q={q} a={a} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -613,9 +885,13 @@ function Contact({ lang, navigate }: { lang: Lang; navigate: (href: string) => v
   return (
     <>
       <Hero lang={lang} title={t.pages.contact.title} body={t.pages.contact.body} primary={t.cta.whatsapp} secondary={t.cta.secondary} navigate={navigate} />
-      <section className={`${sectionClass} grid gap-8 py-16 lg:grid-cols-[1fr_0.8fr]`}>
-        <form
-          className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      <section className={`${sectionClass} grid gap-8 py-20 lg:grid-cols-[1fr_0.75fr]`}>
+        <motion.form
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
           onSubmit={(event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
@@ -625,42 +901,58 @@ function Contact({ lang, navigate }: { lang: Lang; navigate: (href: string) => v
         >
           <div className="grid gap-4 md:grid-cols-2">
             {t.contact.labels.slice(0, 8).map((label, i) => (
-              <label key={label} className="grid gap-2 text-sm font-semibold text-slate-700">
+              <label key={label} className="grid gap-1.5 text-sm font-semibold text-slate-700">
                 {label}
                 <input
                   name={fieldNames[i]}
-                  className="h-11 rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
                 />
               </label>
             ))}
           </div>
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+          <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
             {t.contact.labels[8]}
             <input
               name={fieldNames[8]}
-              className="h-11 rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
             />
           </label>
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+          <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
             {t.contact.labels[9]}
             <textarea
               name={fieldNames[9]}
-              className="min-h-32 rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="min-h-32 rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
             />
           </label>
-          <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 text-sm font-bold text-white hover:bg-teal-700">
+          <button
+            type="submit"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 text-sm font-bold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700"
+          >
             <Send className="size-4" />
             {t.contact.submit}
           </button>
-        </form>
-        <aside className="rounded-xl bg-slate-950 p-6 text-white">
-          <h2 className="text-2xl font-bold">{t.cta.whatsapp}</h2>
-          <p className="mt-3 leading-7 text-slate-300">{t.pages.contact.body}</p>
-          <a href={whatsappUrl(t.pages.contact.title)} className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-teal-500 px-5 text-sm font-bold text-white">
-            <MessageCircle className="size-4" />
-            {t.cta.whatsapp}
-          </a>
-        </aside>
+        </motion.form>
+
+        <motion.aside
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 p-6 text-white"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(20,184,166,0.18),transparent_60%)]" />
+          <div className="relative">
+            <h2 className="text-2xl font-bold">{t.cta.whatsapp}</h2>
+            <p className="mt-3 leading-7 text-slate-300">{t.pages.contact.body}</p>
+            <a
+              href={whatsappUrl(t.pages.contact.title)}
+              className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-500 px-5 text-sm font-bold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-400"
+            >
+              <MessageCircle className="size-4" />
+              {t.cta.whatsapp}
+            </a>
+          </div>
+        </motion.aside>
       </section>
     </>
   );
@@ -671,8 +963,8 @@ function NotFound({ lang, navigate }: { lang: Lang; navigate: (href: string) => 
   return (
     <section className={`${sectionClass} py-24`}>
       <h1 className="text-4xl font-bold">404</h1>
-      <p className="mt-4 text-slate-600">{lang === "ar" ? "الصفحة غير موجودة." : "Page not found."}</p>
-      <AppLink href="/" navigate={navigate} className="mt-6 inline-flex h-11 items-center rounded-lg bg-teal-600 px-4 text-sm font-bold text-white">
+      <p className="mt-4 text-slate-500">{lang === "ar" ? "الصفحة غير موجودة." : "Page not found."}</p>
+      <AppLink href="/" navigate={navigate} className="mt-6 inline-flex h-11 items-center rounded-xl bg-teal-600 px-4 text-sm font-bold text-white">
         {t.nav.home}
       </AppLink>
     </section>
@@ -682,44 +974,49 @@ function NotFound({ lang, navigate }: { lang: Lang; navigate: (href: string) => 
 function Footer({ lang, navigate }: { lang: Lang; navigate: (href: string) => void }) {
   const t = content[lang];
   return (
-    <footer className="border-t border-slate-200 bg-white">
-      <div className={`${sectionClass} grid gap-8 py-10 md:grid-cols-[1fr_2fr]`}>
+    <footer className="border-t border-slate-100 bg-white">
+      <div className={`${sectionClass} grid gap-10 py-12 md:grid-cols-[1.2fr_2fr]`}>
         <div>
-          <p className="text-xl font-bold">{t.brand}</p>
-          <p className="mt-3 max-w-sm text-sm leading-7 text-slate-600">{t.home.promise}</p>
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 text-white shadow-sm">
+              <Sparkles className="size-4" />
+            </span>
+            <p className="text-lg font-bold text-slate-950">{t.brand}</p>
+          </div>
+          <p className="mt-3 max-w-xs text-sm leading-7 text-slate-500">{t.home.promise}</p>
         </div>
         <div className="grid gap-6 sm:grid-cols-3">
           <div>
-            <p className="font-bold">{t.nav.services}</p>
-            <div className="mt-3 grid gap-2">
+            <p className="text-sm font-bold text-slate-950">{t.nav.services}</p>
+            <div className="mt-4 grid gap-2.5">
               {t.services.slice(0, 4).map((item) => (
-                <AppLink key={item.title} href={item.href} navigate={navigate} className="text-sm text-slate-600 hover:text-teal-700">
+                <AppLink key={item.title} href={item.href} navigate={navigate} className="text-sm text-slate-500 transition hover:text-teal-700">
                   {item.title}
                 </AppLink>
               ))}
             </div>
           </div>
           <div>
-            <p className="font-bold">{t.nav.solutions}</p>
-            <div className="mt-3 grid gap-2">
+            <p className="text-sm font-bold text-slate-950">{t.nav.solutions}</p>
+            <div className="mt-4 grid gap-2.5">
               {t.sectors.slice(0, 4).map((item) => (
-                <AppLink key={item.title} href={item.href} navigate={navigate} className="text-sm text-slate-600 hover:text-teal-700">
+                <AppLink key={item.title} href={item.href} navigate={navigate} className="text-sm text-slate-500 transition hover:text-teal-700">
                   {item.title}
                 </AppLink>
               ))}
             </div>
           </div>
           <div>
-            <p className="font-bold">{t.nav.contact}</p>
-            <a href={whatsappUrl(t.cta.primary)} className="mt-3 inline-flex text-sm font-semibold text-teal-700">
+            <p className="text-sm font-bold text-slate-950">{t.nav.contact}</p>
+            <a href={whatsappUrl(t.cta.primary)} className="mt-4 inline-flex text-sm font-semibold text-teal-600 transition hover:text-teal-700">
               {t.cta.whatsapp}
             </a>
           </div>
         </div>
       </div>
       <div className="border-t border-slate-100">
-        <div className={`${sectionClass} flex items-center justify-between py-4`}>
-          <p className="text-xs text-slate-500">{t.ui.copyright}</p>
+        <div className={`${sectionClass} py-4`}>
+          <p className="text-xs text-slate-400">{t.ui.copyright}</p>
         </div>
       </div>
     </footer>
@@ -729,13 +1026,18 @@ function Footer({ lang, navigate }: { lang: Lang; navigate: (href: string) => vo
 function WhatsAppButton({ lang }: { lang: Lang }) {
   const t = content[lang];
   return (
-    <a
+    <motion.a
       href={whatsappUrl(t.cta.primary)}
-      className="fixed bottom-4 z-50 inline-flex size-12 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-900/20 ltr:right-4 rtl:left-4 md:hidden"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: 1.2, type: "spring", stiffness: 260, damping: 20 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      className="fixed bottom-5 z-50 inline-flex size-13 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-900/25 ltr:right-5 rtl:left-5"
       aria-label={t.cta.whatsapp}
     >
       <MessageCircle className="size-6" />
-    </a>
+    </motion.a>
   );
 }
 
@@ -773,7 +1075,13 @@ export default function App() {
   return (
     <div className={`min-h-screen bg-white text-slate-950 ${lang === "ar" ? "rtl" : "ltr"}`}>
       <Header lang={lang} setLang={setLang} path={path} navigate={navigate} />
-      <main>{page}</main>
+      <main>
+        <AnimatePresence mode="wait">
+          <motion.div key={path} variants={fadeIn} initial="hidden" animate="show">
+            {page}
+          </motion.div>
+        </AnimatePresence>
+      </main>
       <Footer lang={lang} navigate={navigate} />
       <WhatsAppButton lang={lang} />
     </div>
