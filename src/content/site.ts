@@ -26,11 +26,7 @@ export const whatsappNumber = "201000000000";
 export const navItems = [
   { href: "/", key: "home" },
   { href: "/services/", key: "services" },
-  { href: "/google-workspace/", key: "googleWorkspace" },
-  { href: "/website-packages/", key: "websites" },
-  { href: "/ai-automation/", key: "automation" },
   { href: "/solutions/", key: "solutions" },
-  { href: "/use-cases/", key: "useCases" },
   { href: "/about/", key: "about" },
   { href: "/contact/", key: "contact" },
 ];
