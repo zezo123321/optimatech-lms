@@ -80,6 +80,7 @@ export const content = {
       servicesTitle: "Digital solutions from setup to day-to-day operations",
       sectorsTitle: "Sector-ready solutions for how your business actually works",
       whyTitle: "Why teams choose Optimatech",
+      whyBody: "Built for practical teams that need their tools to work together, not another isolated system.",
       whyBullets: [
         "Built for SMBs and growing teams in Egypt/MENA",
         "We connect tools instead of adding complexity",
@@ -89,6 +90,20 @@ export const content = {
       ],
       packagesTitle: "Start with the right digital foundation",
     },
+    ui: {
+      learnMore: "Learn more",
+      whatWeBuild: "What we deliver",
+      process: "How we work",
+      processBody: "A clear path from initial brief to live, working digital operations.",
+      faq: "Common questions",
+      copyright: `© ${new Date().getFullYear()} Optimatech. All rights reserved.`,
+      startingFrom: "Starting from",
+    },
+    pricing: [
+      { title: "Workspace Launch", body: "Business email, domain, Drive structure, admin setup, and team training.", href: "/google-workspace/" },
+      { title: "Website Launch", body: "A clear bilingual business website with strong messaging and lead capture.", href: "/website-packages/" },
+      { title: "Automation Sprint", body: "Map and automate one painful recurring workflow in your operations.", href: "/ai-automation/" },
+    ],
     services: [
       {
         id: "workspace",
@@ -308,6 +323,7 @@ export const content = {
       servicesTitle: "خدمات رقمية متكاملة من الإعداد إلى التشغيل",
       sectorsTitle: "حلول جاهزة حسب طبيعة نشاطك",
       whyTitle: "لماذا Optimatech",
+      whyBody: "لأن الأدوات المتفرقة تخلق فوضى. نربط ما عندك بدل ما نضيف تعقيداً.",
       whyBullets: [
         "نفهم احتياجات الشركات الصغيرة والمتوسطة في مصر والمنطقة",
         "نربط الأدوات ببعضها بدل شراء برامج منفصلة",
@@ -317,6 +333,20 @@ export const content = {
       ],
       packagesTitle: "ابدأ من الأساس الرقمي المناسب",
     },
+    ui: {
+      learnMore: "اعرف أكثر",
+      whatWeBuild: "ماذا نقدم",
+      process: "كيف نعمل",
+      processBody: "مسار واضح من أول جلسة حتى التشغيل الفعلي.",
+      faq: "أسئلة شائعة",
+      copyright: `© ${new Date().getFullYear()} Optimatech. جميع الحقوق محفوظة.`,
+      startingFrom: "يبدأ من",
+    },
+    pricing: [
+      { title: "إطلاق Workspace", body: "بريد احترافي، دومين، تنظيم Drive، إعداد الإدارة، وتدريب الفريق.", href: "/google-workspace/" },
+      { title: "إطلاق الموقع", body: "موقع ثنائي اللغة برسائل واضحة وصفحة جذب عملاء فعّالة.", href: "/website-packages/" },
+      { title: "سبرينت أتمتة", body: "حدد واحد workflow متكرر وكلّفنا بأتمتته بالكامل.", href: "/ai-automation/" },
+    ],
     services: [
       {
         id: "workspace",

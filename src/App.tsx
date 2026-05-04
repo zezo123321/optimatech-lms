@@ -115,6 +115,7 @@ function Header({
           <button
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+            aria-label={lang === "ar" ? "Switch to English" : "التبديل إلى العربية"}
           >
             <Globe2 className="size-4" />
             {lang === "ar" ? "EN" : "عربي"}
@@ -133,7 +134,10 @@ function Header({
         <div className="border-t border-slate-200 bg-white lg:hidden">
           <div className="mx-auto grid max-w-7xl gap-1 px-4 py-4">
             {links}
-            <button className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>
+            <button
+              className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold"
+              onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+            >
               <Globe2 className="size-4" />
               {lang === "ar" ? "English" : "العربية"}
             </button>
@@ -248,16 +252,19 @@ function SectionHeading({ title, body }: { title: string; body?: string }) {
 }
 
 function CardGrid({
+  lang,
   title,
   items,
   type,
   navigate,
 }: {
+  lang: Lang;
   title: string;
   items: Array<{ id: string; title: string; body: string; href: string }>;
   type: "service" | "sector";
   navigate: (href: string) => void;
 }) {
+  const t = content[lang];
   return (
     <section className={`${sectionClass} py-16`}>
       <SectionHeading title={title} />
@@ -272,7 +279,7 @@ function CardGrid({
               <h3 className="text-lg font-bold text-slate-950">{item.title}</h3>
               <p className="mt-3 min-h-20 text-sm leading-7 text-slate-600">{item.body}</p>
               <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-teal-700">
-                Learn more
+                {t.ui.learnMore}
                 <ArrowRight className="size-4 transition group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
               </span>
             </AppLink>
@@ -283,10 +290,11 @@ function CardGrid({
   );
 }
 
-function FeatureGrid({ title, features }: { title: string; features: string[] }) {
+function FeatureGrid({ lang, title, features }: { lang: Lang; title: string; features: string[] }) {
+  const t = content[lang];
   return (
     <section className={`${sectionClass} py-16`}>
-      <SectionHeading title={title} />
+      <SectionHeading title={title || t.ui.whatWeBuild} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {features.map((feature) => (
           <div key={feature} className="flex gap-3 rounded-xl border border-slate-200 bg-white p-5">
@@ -390,13 +398,14 @@ function WebsitePackagesDetail({
   );
 }
 
-function Process({ steps }: { steps: string[] }) {
+function Process({ lang }: { lang: Lang }) {
+  const t = content[lang];
   return (
     <section className="bg-slate-950 py-16 text-white">
       <div className={sectionClass}>
-        <SectionHeading title="Process" body="A clear delivery path from business need to working digital operations." />
+        <SectionHeading title={t.ui.process} body={t.ui.processBody} />
         <div className="grid gap-4 md:grid-cols-5">
-          {steps.map((step, index) => (
+          {t.process.map((step, index) => (
             <div key={step} className="rounded-xl border border-white/10 bg-white/5 p-5">
               <span className="text-sm font-bold text-teal-300">0{index + 1}</span>
               <h3 className="mt-4 font-bold">{step}</h3>
@@ -408,11 +417,12 @@ function Process({ steps }: { steps: string[] }) {
   );
 }
 
-function Why({ title, bullets }: { title: string; bullets: string[] }) {
+function Why({ lang, title, bullets }: { lang: Lang; title: string; bullets: string[] }) {
+  const t = content[lang];
   return (
     <section className="bg-slate-50 py-16">
       <div className={`${sectionClass} grid gap-8 lg:grid-cols-[0.8fr_1.2fr]`}>
-        <SectionHeading title={title} body="Built for practical teams that need tools to work together, not another isolated system." />
+        <SectionHeading title={title} body={t.home.whyBody} />
         <div className="grid gap-3">
           {bullets.map((bullet) => (
             <div key={bullet} className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -445,21 +455,15 @@ function UseCases({ lang }: { lang: Lang }) {
 
 function PricingStarts({ lang, navigate }: { lang: Lang; navigate: (href: string) => void }) {
   const t = content[lang];
-  const packages = [
-    ["Workspace Launch", "Email, domain, Drive, admin setup, and training.", "/google-workspace/"],
-    ["Website Launch", "A clear bilingual business website with lead capture.", "/website-packages/"],
-    ["Automation Sprint", "Map and automate one painful recurring workflow.", "/ai-automation/"],
-  ];
   return (
     <section className="bg-white py-16">
       <div className={sectionClass}>
         <SectionHeading title={t.home.packagesTitle} />
         <div className="grid gap-4 md:grid-cols-3">
-          {packages.map(([title, body, href]) => (
+          {t.pricing.map(({ title, body, href }) => (
             <div key={title} className="rounded-xl border border-slate-200 p-5">
               <h3 className="text-lg font-bold">{title}</h3>
               <p className="mt-3 min-h-16 text-sm leading-7 text-slate-600">{body}</p>
-              <p className="mt-5 text-sm font-bold text-slate-950">Starting from request quote</p>
               <AppLink href={href} navigate={navigate} className="mt-5 inline-flex h-10 items-center rounded-lg bg-slate-950 px-4 text-sm font-bold text-white">
                 {t.cta.quote}
               </AppLink>
@@ -499,10 +503,10 @@ function Home({ lang, navigate }: { lang: Lang; navigate: (href: string) => void
   return (
     <>
       <Hero lang={lang} title={t.home.heroTitle} body={t.home.heroBody} eyebrow={t.home.promise} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} />
-      <CardGrid title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
-      <CardGrid title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
-      <Why title={t.home.whyTitle} bullets={t.home.whyBullets} />
-      <Process steps={t.process} />
+      <CardGrid lang={lang} title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
+      <CardGrid lang={lang} title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
+      <Why lang={lang} title={t.home.whyTitle} bullets={t.home.whyBullets} />
+      <Process lang={lang} />
       <UseCases lang={lang} />
       <PricingStarts lang={lang} navigate={navigate} />
       <CtaBand lang={lang} navigate={navigate} />
@@ -515,8 +519,8 @@ function Services({ lang, navigate }: { lang: Lang; navigate: (href: string) => 
   return (
     <>
       <Hero lang={lang} title={t.pages.services.title} body={t.pages.services.body} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} />
-      <CardGrid title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
-      <Process steps={t.process} />
+      <CardGrid lang={lang} title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
+      <Process lang={lang} />
       <UseCases lang={lang} />
       <CtaBand lang={lang} navigate={navigate} />
     </>
@@ -528,7 +532,7 @@ function Solutions({ lang, navigate }: { lang: Lang; navigate: (href: string) =>
   return (
     <>
       <Hero lang={lang} title={t.pages.solutions.title} body={t.pages.solutions.body} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} />
-      <CardGrid title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
+      <CardGrid lang={lang} title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
       <UseCases lang={lang} />
       <CtaBand lang={lang} navigate={navigate} />
     </>
@@ -546,9 +550,9 @@ function DetailPage({ lang, path, navigate }: { lang: Lang; path: string; naviga
   return (
     <>
       <Hero lang={lang} title={page.title} body={page.body} primary={t.cta.primary} secondary={t.cta.whatsapp} navigate={navigate} />
-      <FeatureGrid title="What we build" features={page.features} />
+      <FeatureGrid lang={lang} title={t.ui.whatWeBuild} features={page.features} />
       {path === "/website-packages/" && <WebsitePackagesDetail lang={lang} page={websitePackagesPage} />}
-      <Process steps={t.process} />
+      <Process lang={lang} />
       <UseCases lang={lang} />
       <Faq lang={lang} />
       <CtaBand lang={lang} message={page.message} navigate={navigate} />
@@ -557,6 +561,7 @@ function DetailPage({ lang, path, navigate }: { lang: Lang; path: string; naviga
 }
 
 function Faq({ lang }: { lang: Lang }) {
+  const t = content[lang];
   const questions =
     lang === "ar"
       ? [
@@ -572,13 +577,13 @@ function Faq({ lang }: { lang: Lang }) {
   return (
     <section className="bg-slate-50 py-16">
       <div className={sectionClass}>
-        <SectionHeading title="FAQ" />
+        <SectionHeading title={t.ui.faq} />
         <div className="grid gap-3">
           {questions.map(([q, a]) => (
-            <details key={q} className="rounded-xl border border-slate-200 bg-white p-5">
+            <details key={q} className="group rounded-xl border border-slate-200 bg-white p-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-slate-950">
                 {q}
-                <ChevronDown className="size-5 shrink-0" />
+                <ChevronDown className="size-5 shrink-0 transition group-open:rotate-180" />
               </summary>
               <p className="mt-4 leading-7 text-slate-600">{a}</p>
             </details>
@@ -594,8 +599,8 @@ function About({ lang, navigate }: { lang: Lang; navigate: (href: string) => voi
   return (
     <>
       <Hero lang={lang} title={t.pages.about.title} body={t.pages.about.body} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} />
-      <Why title={t.home.whyTitle} bullets={t.home.whyBullets} />
-      <CardGrid title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
+      <Why lang={lang} title={t.home.whyTitle} bullets={t.home.whyBullets} />
+      <CardGrid lang={lang} title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
       <CtaBand lang={lang} navigate={navigate} />
     </>
   );
@@ -603,24 +608,47 @@ function About({ lang, navigate }: { lang: Lang; navigate: (href: string) => voi
 
 function Contact({ lang, navigate }: { lang: Lang; navigate: (href: string) => void }) {
   const t = content[lang];
+  const fieldNames = ["name", "company", "email", "phone", "company_size", "service", "current_tools", "budget", "language", "message"] as const;
+
   return (
     <>
       <Hero lang={lang} title={t.pages.contact.title} body={t.pages.contact.body} primary={t.cta.whatsapp} secondary={t.cta.secondary} navigate={navigate} />
       <section className={`${sectionClass} grid gap-8 py-16 lg:grid-cols-[1fr_0.8fr]`}>
-        <form className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={(event) => event.preventDefault()}>
+        <form
+          className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const data = new FormData(event.currentTarget);
+            const message = `${t.cta.primary}\n\n${[...data.entries()].map(([k, v]) => `${k}: ${v}`).join("\n")}`;
+            window.open(whatsappUrl(message), "_blank");
+          }}
+        >
           <div className="grid gap-4 md:grid-cols-2">
-            {t.contact.labels.slice(0, 9).map((label) => (
+            {t.contact.labels.slice(0, 8).map((label, i) => (
               <label key={label} className="grid gap-2 text-sm font-semibold text-slate-700">
                 {label}
-                <input className="h-11 rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
+                <input
+                  name={fieldNames[i]}
+                  className="h-11 rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                />
               </label>
             ))}
           </div>
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            {t.contact.labels[9]}
-            <textarea className="min-h-32 rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
+            {t.contact.labels[8]}
+            <input
+              name={fieldNames[8]}
+              className="h-11 rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+            />
           </label>
-          <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 text-sm font-bold text-white hover:bg-teal-700">
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            {t.contact.labels[9]}
+            <textarea
+              name={fieldNames[9]}
+              className="min-h-32 rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+            />
+          </label>
+          <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 text-sm font-bold text-white hover:bg-teal-700">
             <Send className="size-4" />
             {t.contact.submit}
           </button>
@@ -643,7 +671,7 @@ function NotFound({ lang, navigate }: { lang: Lang; navigate: (href: string) => 
   return (
     <section className={`${sectionClass} py-24`}>
       <h1 className="text-4xl font-bold">404</h1>
-      <p className="mt-4 text-slate-600">Page not found.</p>
+      <p className="mt-4 text-slate-600">{lang === "ar" ? "الصفحة غير موجودة." : "Page not found."}</p>
       <AppLink href="/" navigate={navigate} className="mt-6 inline-flex h-11 items-center rounded-lg bg-teal-600 px-4 text-sm font-bold text-white">
         {t.nav.home}
       </AppLink>
@@ -689,6 +717,11 @@ function Footer({ lang, navigate }: { lang: Lang; navigate: (href: string) => vo
           </div>
         </div>
       </div>
+      <div className="border-t border-slate-100">
+        <div className={`${sectionClass} flex items-center justify-between py-4`}>
+          <p className="text-xs text-slate-500">{t.ui.copyright}</p>
+        </div>
+      </div>
     </footer>
   );
 }
@@ -696,7 +729,11 @@ function Footer({ lang, navigate }: { lang: Lang; navigate: (href: string) => vo
 function WhatsAppButton({ lang }: { lang: Lang }) {
   const t = content[lang];
   return (
-    <a href={whatsappUrl(t.cta.primary)} className="fixed bottom-4 z-50 inline-flex size-12 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-900/20 ltr:right-4 rtl:left-4 md:hidden" aria-label={t.cta.whatsapp}>
+    <a
+      href={whatsappUrl(t.cta.primary)}
+      className="fixed bottom-4 z-50 inline-flex size-12 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-900/20 ltr:right-4 rtl:left-4 md:hidden"
+      aria-label={t.cta.whatsapp}
+    >
       <MessageCircle className="size-6" />
     </a>
   );
