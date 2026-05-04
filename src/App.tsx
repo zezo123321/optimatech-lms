@@ -7,6 +7,7 @@ import {
   Globe2,
   Menu,
   MessageCircle,
+  Quote,
   Send,
   Sparkles,
   X,
@@ -21,6 +22,7 @@ import {
   type Lang,
   whatsappUrl,
 } from "@/content/site";
+import { trustBadges, testimonials } from "@/content/trust";
 
 const sectionClass = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -152,7 +154,7 @@ function Header({
           <AppLink
             href="/contact/"
             navigate={navigate}
-            className="inline-flex h-9 items-center rounded-lg bg-teal-600 px-4 text-sm font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700"
+            className="inline-flex h-9 items-center rounded-lg bg-teal-600 px-4 text-sm font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
           >
             {t.cta.primary}
           </AppLink>
@@ -283,7 +285,7 @@ function Hero({
             <AppLink
               href="/contact/"
               navigate={navigate}
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 text-sm font-bold text-white shadow-md shadow-teal-600/25 transition hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/30"
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 text-sm font-bold text-white shadow-md shadow-teal-600/25 transition hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/30 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
             >
               {primary}
               <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
@@ -292,12 +294,13 @@ function Hero({
               <AppLink
                 href="/solutions/"
                 navigate={navigate}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-800 shadow-sm transition hover:border-slate-300 hover:shadow"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-800 shadow-sm transition hover:border-slate-300 hover:shadow active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
               >
                 {secondary}
               </AppLink>
             )}
           </motion.div>
+          <HeroTrustBadges lang={lang} />
         </motion.div>
 
         {showVisual && (
@@ -715,7 +718,7 @@ function CtaBand({ lang, message, navigate }: { lang: Lang; message?: string; na
             <AppLink
               href="/contact/"
               navigate={navigate}
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-teal-500 px-5 text-sm font-bold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-400"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-teal-500 px-5 text-sm font-bold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-400 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
             >
               {t.cta.primary}
             </AppLink>
@@ -733,16 +736,134 @@ function CtaBand({ lang, message, navigate }: { lang: Lang; message?: string; na
   );
 }
 
+// ─── Trust components ────────────────────────────────────────────────────────
+
+function HeroTrustBadges({ lang }: { lang: Lang }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className="mt-8 flex flex-wrap gap-3"
+      role="list"
+      aria-label={lang === "ar" ? "مميزات الخدمة" : "Service highlights"}
+    >
+      {trustBadges.map((badge) => (
+        <span
+          key={badge.en}
+          role="listitem"
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm"
+        >
+          <badge.Icon className="size-3.5 text-teal-600" aria-hidden="true" />
+          {lang === "ar" ? badge.ar : badge.en}
+        </span>
+      ))}
+    </motion.div>
+  );
+}
+
+function TrustStrip({ lang }: { lang: Lang }) {
+  return (
+    <section className="border-y border-slate-100 bg-slate-50/60">
+      <div className={sectionClass}>
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid grid-cols-2 divide-x divide-slate-100 rtl:divide-x-reverse md:grid-cols-4"
+        >
+          {trustBadges.map((badge) => (
+            <motion.div
+              key={badge.en}
+              variants={fadeUp}
+              className="flex flex-col items-center gap-2 px-6 py-8 text-center"
+            >
+              <span className="flex size-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                <badge.Icon className="size-5" aria-hidden="true" />
+              </span>
+              <p className="text-sm font-semibold text-slate-700">
+                {lang === "ar" ? badge.ar : badge.en}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function Testimonials({ lang }: { lang: Lang }) {
+  const heading = lang === "ar" ? "ماذا يقول عملاؤنا" : "What our clients say";
+  const subheading =
+    lang === "ar"
+      ? "شهادات حقيقية من فرق عملت معنا — ستُضاف قريباً."
+      : "Real feedback from teams we've worked with — coming soon.";
+
+  return (
+    <section className="bg-gradient-to-br from-slate-50 to-white py-20">
+      <div className={sectionClass}>
+        <SectionHeading title={heading} body={subheading} />
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+          className="grid gap-5 md:grid-cols-3"
+        >
+          {testimonials.map((t, i) => (
+            <motion.figure
+              key={i}
+              variants={fadeUp}
+              role="article"
+              aria-label={lang === "ar" ? `شهادة ${i + 1}` : `Testimonial ${i + 1}`}
+              className="relative flex flex-col rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm"
+            >
+              {t.placeholder && (
+                <span className="mb-3 inline-flex self-start rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-600 ring-1 ring-amber-200">
+                  {lang === "ar" ? "مؤقت — يُستبدل بشهادة حقيقية" : "Placeholder — replace with real quote"}
+                </span>
+              )}
+              <Quote className="mb-3 size-6 text-teal-200" aria-hidden="true" />
+              <blockquote className="flex-1 text-sm leading-7 text-slate-600 italic">
+                {lang === "ar" ? t.quote.ar : t.quote.en}
+              </blockquote>
+              <figcaption className="mt-5 flex items-center gap-3">
+                <span
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500"
+                  aria-hidden="true"
+                >
+                  {t.initials}
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">
+                    {lang === "ar" ? t.name.ar : t.name.en}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {lang === "ar" ? t.role.ar : t.role.en}
+                  </p>
+                </div>
+              </figcaption>
+            </motion.figure>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pages ───────────────────────────────────────────────────────────────────
+
 function Home({ lang, navigate }: { lang: Lang; navigate: (href: string) => void }) {
   const t = content[lang];
   return (
     <>
       <Hero lang={lang} title={t.home.heroTitle} body={t.home.heroBody} eyebrow={t.home.promise} primary={t.cta.primary} secondary={t.cta.secondary} navigate={navigate} showVisual />
+      <TrustStrip lang={lang} />
       <CardGrid lang={lang} title={t.home.servicesTitle} items={t.services} type="service" navigate={navigate} />
       <CardGrid lang={lang} title={t.home.sectorsTitle} items={t.sectors} type="sector" navigate={navigate} />
       <Why lang={lang} title={t.home.whyTitle} bullets={t.home.whyBullets} />
       <Process lang={lang} />
       <UseCases lang={lang} />
+      <Testimonials lang={lang} />
       <PricingStarts lang={lang} navigate={navigate} />
       <CtaBand lang={lang} navigate={navigate} />
     </>
@@ -926,7 +1047,7 @@ function Contact({ lang, navigate }: { lang: Lang; navigate: (href: string) => v
           </label>
           <button
             type="submit"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 text-sm font-bold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 text-sm font-bold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
           >
             <Send className="size-4" />
             {t.contact.submit}
